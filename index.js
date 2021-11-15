@@ -72,7 +72,18 @@ async function run () {
         const result = await watchCollection.insertOne(newWatchPackage);
         res.json(result);
       })
-    
+    // Get All orders for Admin
+    app.get('/manageorder', async(req,res) => {
+        const data = ordersCollection.find();
+        const orders = await data.toArray();
+        res.send(orders);
+    })
+    // Get All users for Admin
+    app.get('/users', async(req,res) => {
+        const data = usersCollection.find();
+        const users = await data.toArray();
+        res.send(users);
+    })
 
     //Get specific user Orders
     app.get('/orders/:uid', async(req,res) => {
@@ -127,7 +138,7 @@ async function run () {
             const user = req.body;
            const requester = req.decodedEmail;
            if(requester) {
-               const requesterUser = await usersCollection.findOne({email: rquester})
+               const requesterUser = await usersCollection.findOne({email: requester})
                if(requesterUser.role === 'admin') {
                 const filter = { email: user.email };
                 const updateDoc = { $set: {role:'admin'} };
@@ -139,7 +150,15 @@ async function run () {
                req.status(403).json({message: "You don't have authoraization to make admin"})
            }
             
-            });
+        });
+        //Delete api
+        app.delete('/orders/:usid', async(req,res) => {
+            const id = req.params.usid;
+            const query = {selectedWatchId: id}
+            const result = await ordersCollection.deleteOne(query);
+            res.send(result);
+            
+        })
     }
     finally {
     //    await client.close();
