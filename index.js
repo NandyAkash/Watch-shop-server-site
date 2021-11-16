@@ -52,6 +52,7 @@ async function run () {
         const watchCollection = database.collection('watches');
         const usersCollection = database.collection('users');
         const ordersCollection = database.collection('orders');
+        const reviewCollection = database.collection('review');
 
     //Get watches
     app.get('/watches', async(req,res) => {
@@ -84,6 +85,12 @@ async function run () {
         const users = await data.toArray();
         res.send(users);
     })
+    // Get All reviews
+    app.get('/review', async(req,res) => {
+        const data = reviewCollection.find();
+        const reviews = await data.toArray();
+        res.send(reviews);
+    })
 
     //Get specific user Orders
     app.get('/orders/:uid', async(req,res) => {
@@ -111,6 +118,13 @@ async function run () {
         const result = await ordersCollection.insertOne(orderPackage);
         res.json(result);
     })
+    
+    //Post review
+    app.post('/review', async(req, res) => {
+        const reviewbody = req.body;
+        const result = await reviewCollection.insertOne(reviewbody);
+        res.json(result);
+    })
       
     //Post api
     app.post('/users', async(req, res) => {
@@ -125,6 +139,7 @@ async function run () {
             res.json(result);
         } 
       })
+
       app.put('/users', async (req, res) => {
         const user = req.body;
         const filter = { email: user.email };
@@ -136,19 +151,19 @@ async function run () {
 
         app.put('/users/admin', verifyToken, async (req, res) => {
             const user = req.body;
-           const requester = req.decodedEmail;
-           if(requester) {
-               const requesterUser = await usersCollection.findOne({email: requester})
-               if(requesterUser.role === 'admin') {
+            const requester = req.decodedEmail;
+            if(requester) {
+                const requesterUser = await usersCollection.findOne({email: requester})
+                if(requesterUser.role === 'admin') {
                 const filter = { email: user.email };
                 const updateDoc = { $set: {role:'admin'} };
                 const result = await usersCollection.updateOne(filter, updateDoc);
                 res.json(result);
-               }
-           }
-           else {
-               req.status(403).json({message: "You don't have authoraization to make admin"})
-           }
+                }
+            }
+            else {
+                req.status(403).json({message: "You don't have authoraization to make admin"})
+            }
             
         });
         //Delete api
