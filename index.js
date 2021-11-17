@@ -166,11 +166,19 @@ async function run () {
             }
             
         });
-        //Delete api
+        //Delete order api
         app.delete('/orders/:usid', async(req,res) => {
             const id = req.params.usid;
             const query = {selectedWatchId: id}
             const result = await ordersCollection.deleteOne(query);
+            res.send(result);
+            
+        })
+        //Delete product/watch api
+        app.delete('/watches/:usid', async(req,res) => {
+            const id = req.params.usid;
+            const query = {_id: ObjectId(id)}
+            const result = await watchCollection.deleteOne(query);
             res.send(result);
             
         })
